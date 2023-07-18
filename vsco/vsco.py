@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor, wait
 import json
 
 import requests
@@ -9,7 +10,6 @@ from io import BytesIO
 from typing import Union
 
 from .exceptions import VscoRequestException, InvalidProfileException, VscoImageAlreadyLoadedException
-
 
 # CONSTANTS:
 logger = logging.getLogger("vsco.py")
@@ -199,12 +199,23 @@ class VscoProfile:
     def get_profile_images(self) -> list[VscoImage]:
         return self.images
 
-    def load_all_images(self):
-        for im in self.images:
+    def load_all_images(self, threads: int = None):
+
+        def load_im(img):
             try:
-                im.load()
+                img.load()
             except VscoImageAlreadyLoadedException:
                 logger.debug("Image already loaded.")
+
+        if threads is not None:
+            futures = []
+            with ThreadPoolExecutor(max_workers=threads) as executor:
+                for im in self.images:
+                    futures.append(executor.submit(load_im, im))
+                wait(futures)
+        else:
+            for im in self.images:
+                load_im(im)
 
 
 class VscoLoader:

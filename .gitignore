@@ -3,3 +3,9 @@ __pycache__
 venv
 
 example.py
+
+release.bat
+*.png
+build
+dist
+vsco.egg-info
