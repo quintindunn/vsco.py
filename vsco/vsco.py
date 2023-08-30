@@ -19,7 +19,10 @@ HOST = "https://vsco.co"
 
 class Requester:
     def __init__(self):
-        self.base_headers = {}
+        self.base_headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/116.0.0.0 Safari/537.36"
+        }
 
     def get(self, url, **kwargs):
         headers = kwargs.get("headers") if kwargs.get("headers") else dict()
@@ -64,6 +67,11 @@ class VscoImage:
         self.width: int = -1
 
     def from_adaptive_base(self, im_id):
+        """
+        Sets self.im given an image id.
+        :param im_id: The uuid to the image.
+        :return: None
+        """
         request = requests.get(f"{HOST}/i/{im_id}")
         if request.status_code != 200:
             raise VscoRequestException("Image not found.")
@@ -132,6 +140,10 @@ class VscoImage:
         return self
 
     def load(self):
+        """
+        Gets the image data from the vsco servers and saves to self.im.
+        :return: None
+        """
         if self.im is not None:
             raise VscoImageAlreadyLoadedException("VscoImage.im is not None.")
 
@@ -177,6 +189,9 @@ class VscoProfile:
         return self
 
     def _load_more(self, cursor, site_id, media=None):
+        """
+        Recursive function to get all images from a given user's profile.
+        """
         url = f"{HOST}/api/3.0/medias/profile?site_id={site_id}&limit=9999&cursor={cursor}"
         request = self.requests.get(url)
 
@@ -200,7 +215,11 @@ class VscoProfile:
         return self.images
 
     def load_all_images(self, threads: int = None):
-
+        """
+        Loads all images.
+        :param threads: The number of threads used to load the images, set to None to not use multithreading
+        :return: None
+        """
         def load_im(img):
             try:
                 img.load()
@@ -228,8 +247,7 @@ class VscoLoader:
             return self._get_profile_from_username(key)
 
     def _get_profile_from_username(self, username: str):
-        request = self.requester.get(f"https://vsco.co/{username}")
-
+        request = self.requester.get(f"https://vsco.co/{username}/gallery")
         if request.status_code == 404:
             raise InvalidProfileException(f"No profile found with username \"{username}\"")
 
