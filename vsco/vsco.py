@@ -206,7 +206,7 @@ class VscoProfile:
         else:
             media = data.get("media")
 
-        if next_cursor is not None:
+        if next_cursor is not None and next_cursor != cursor:
             return self._load_more(cursor=next_cursor, site_id=site_id, media=media)
 
         return media
