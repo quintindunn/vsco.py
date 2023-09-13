@@ -37,6 +37,8 @@ class Requester:
 
 class VscoImage:
     def __init__(self):
+        self.requests = Requester()
+
         self.im: Union[None, Image.Image] = None
 
         self.id: str = ''
@@ -72,7 +74,7 @@ class VscoImage:
         :param im_id: The uuid to the image.
         :return: None
         """
-        request = requests.get(f"{HOST}/i/{im_id}")
+        request = self.requests.get(f"{HOST}/i/{im_id}")
         if request.status_code != 200:
             raise VscoRequestException("Image not found.")
         self.im = Image.open(BytesIO(request.content))
@@ -149,7 +151,7 @@ class VscoImage:
 
         logger.debug(f"Getting image from {HOST}/{self.adaptiveBase}")
 
-        request = requests.get(f"{HOST}/{self.adaptiveBase}")
+        request = self.requests.get(f"{HOST}/{self.adaptiveBase}")
 
         if request.status_code != 200:
             raise VscoRequestException("Error creating image")
