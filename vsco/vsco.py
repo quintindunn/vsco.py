@@ -190,11 +190,18 @@ class VscoProfile:
             self.images.append(im)
         return self
 
-    def _load_more(self, cursor, site_id, media=None):
+    def _load_more(self, cursor, site_id, media=None, previous_cursors=None):
         """
         Recursive function to get all images from a given user's profile.
         """
-        url = f"{HOST}/api/3.0/medias/profile?site_id={site_id}&limit=9999&cursor={cursor}"
+
+        url = f"{HOST}/api/3.0/medias/profile?site_id={site_id}&limit=99999&cursor={cursor}"
+
+        if previous_cursors is None:
+            previous_cursors = {cursor}
+        else:
+            previous_cursors.add(cursor)
+
         request = self.requests.get(url)
 
         if request.status_code != 200:
@@ -202,14 +209,13 @@ class VscoProfile:
 
         data = request.json()
         next_cursor = data.get("next_cursor")
-
         if media:
             media += data.get("media")
         else:
             media = data.get("media")
 
-        if next_cursor is not None and next_cursor != cursor:
-            return self._load_more(cursor=next_cursor, site_id=site_id, media=media)
+        if next_cursor is not None and next_cursor != cursor and next_cursor not in previous_cursors:
+            return self._load_more(cursor=next_cursor, site_id=site_id, media=media, previous_cursors=previous_cursors)
 
         return media
 
