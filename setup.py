@@ -1,6 +1,6 @@
 from setuptools import setup
 
-VERSION = "0.0.4"
+VERSION = "0.0.5"
 DESCRIPTION = "A Python API wrapper for VSCO."
 LONG_DESCRIPTION = "A Python (unofficial) API wrapper for VSCO."
 
